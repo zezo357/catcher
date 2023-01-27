@@ -69,7 +69,7 @@ class FileHandler extends ReportHandler {
 
           final IOSink sink = file.openWrite(mode: FileMode.append);
           for (String line in lines.sublist(lines.length - 200)) {
-            sink.write(line);
+            sink.write(line+"\n");
           }
 
           await sink.flush();
