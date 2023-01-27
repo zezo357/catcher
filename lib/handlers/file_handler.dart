@@ -14,13 +14,14 @@ class FileHandler extends ReportHandler {
   final bool enableCustomParameters;
   final bool printLogs;
   final bool handleWhenRejected;
-
+  final int fileLimitInLines;
   late IOSink _sink;
   bool _fileValidated = false;
   bool _fileValidationResult = false;
 
   FileHandler(
     this.file, {
+    this.fileLimitInLines = 1000,
     this.enableDeviceParameters = true,
     this.enableApplicationParameters = true,
     this.enableStackTrace = true,
@@ -59,6 +60,18 @@ class FileHandler extends ReportHandler {
       final bool exists = await file.exists();
       if (!exists) {
         file.createSync();
+      } else {
+        List<String> lines = file.readAsLinesSync();
+        if (lines.length > fileLimitInLines) {
+          _printLog("Log file is too long,deleting exceeding lines");
+          final IOSink sink = file.openWrite(mode: FileMode.append);
+          for (String line in lines.sublist(lines.length - 200)) {
+            sink.write(line);
+          }
+
+          await sink.flush();
+          await sink.close();
+        }
       }
       final IOSink sink = file.openWrite(mode: FileMode.append);
       sink.write("");
