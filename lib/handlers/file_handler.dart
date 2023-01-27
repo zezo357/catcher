@@ -64,6 +64,9 @@ class FileHandler extends ReportHandler {
         List<String> lines = file.readAsLinesSync();
         if (lines.length > fileLimitInLines) {
           _printLog("Log file is too long,deleting exceeding lines");
+          file.deleteSync();
+          file.createSync();
+
           final IOSink sink = file.openWrite(mode: FileMode.append);
           for (String line in lines.sublist(lines.length - 200)) {
             sink.write(line);
